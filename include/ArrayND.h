@@ -429,15 +429,46 @@ namespace Prismatic {
 			char char_header[800];
 			std::memset((void *) char_header, 0, 800);
 			std::memset((void *) int_header, 0, 56 * sizeof(int));
-			int_header[0] = (int) dims[1]; //nx
-			int_header[1] = (int) dims[0]; //ny
+			int_header[0] = ((int) dims[1])/2; //nx cropped
+			int_header[1] = ((int) dims[0])/2; //ny cropped
 			int_header[2] = (int) 1; //nz
 			int_header[3] = 2; //mode, float
 			f.write((char*)int_header,56*4); //use 4 instead of sizeof(int) because architecture may change but file format won't
 			f.write(char_header,800);
-			float* data_buffer = new float[this->size()];
-			for (auto i = 0; i < this->size(); ++i)data_buffer[i] = (float)data[i];
-			f.write((char*)data_buffer,this->size()*sizeof(float));
+			float* data_buffer = new float[(this->size())/4];
+			
+			// create 2x 2D array
+			std::vector<std::vector<float>> array2D;
+			// Set up sizes. (HEIGHT x WIDTH)
+			array2D.resize(2*int_header[0]);
+			for (int i = 0; i < 2*int_header[0]; ++i)
+			    array2D[i].resize(2*int_header[1]);
+			
+			std::vector<std::vector<float>> array2D_swap;
+			// Set up sizes. (HEIGHT x WIDTH)
+			array2D_swap.resize(2*int_header[0]);
+			for (int i = 0; i < 2*int_header[0]; ++i)
+			    array2D_swap[i].resize(2*int_header[1]);
+			
+			
+			//load array
+			for (auto i = 0; i < this->size(); ++i) array2D[i/(2*int_header[0])][i%(2*int_header[1])] = (float)data[i];
+			//swap quadrants
+			for (auto x = 0; x < int_header[0]; ++x){
+			    for (auto y = 0; y < int_header[1]; ++y){
+			        array2D_swap[x]              [y]                =array2D[x+int_header[0]][y+int_header[1]];
+			        array2D_swap[x+int_header[0]][y]                =array2D[x]              [y+int_header[1]];
+			        array2D_swap[x]              [y+int_header[1]]  =array2D[x+int_header[0]][y];
+			        array2D_swap[x+int_header[0]][y+int_header[1]]  =array2D[x]              [y];
+			    }
+			}
+			
+			//write swapped and cropped array    
+			int i = 0;
+			for (auto x = 0; x < int_header[0]; ++x){
+			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[0]/2];
+			}
+			f.write((char*)data_buffer,(this->size())/4*sizeof(float));
 			delete[] data_buffer;
 		}
 	}
@@ -452,15 +483,45 @@ namespace Prismatic {
 			char char_header[800];
 			std::memset((void *) char_header, 0, 800);
 			std::memset((void *) int_header, 0, 56 * sizeof(int));
-			int_header[0] = (int) dims[1]; //nx
-			int_header[1] = (int) dims[0]; //ny
+			int_header[0] = ((int) dims[1])/2; //nx cropped
+			int_header[1] = ((int) dims[0])/2; //ny cropped
 			int_header[2] = (int) 1; //nz
 			int_header[3] = 2; //mode, float
 			f.write((char*)int_header,56*4); //use 4 instead of sizeof(int) because architecture may change but file format won't
 			f.write(char_header,800);
-			float* data_buffer = new float[this->size()];
-			for (auto i = 0; i < this->size(); ++i)data_buffer[i] = (float)data[i];
-			f.write((char*)data_buffer,this->size()*sizeof(float));
+			float* data_buffer = new float[(this->size())/4];
+			
+			// create 2x 2D array
+			std::vector<std::vector<float>> array2D;
+			// Set up sizes. (HEIGHT x WIDTH)
+			array2D.resize(2*int_header[0]);
+			for (int i = 0; i < 2*int_header[0]; ++i)
+			    array2D[i].resize(2*int_header[1]);
+			
+			std::vector<std::vector<float>> array2D_swap;
+			// Set up sizes. (HEIGHT x WIDTH)
+			array2D_swap.resize(2*int_header[0]);
+			for (int i = 0; i < 2*int_header[0]; ++i)
+			    array2D_swap[i].resize(2*int_header[1]);
+			
+			//load array
+			for (auto i = 0; i < this->size(); ++i) array2D[i/(2*int_header[0])][i%(2*int_header[1])] = (float)data[i];
+			//swap quadrants
+			for (auto x = 0; x < int_header[0]; ++x){
+			    for (auto y = 0; y < int_header[1]; ++y){
+			        array2D_swap[x]              [y]                =array2D[x+int_header[0]][y+int_header[1]];
+			        array2D_swap[x+int_header[0]][y]                =array2D[x]              [y+int_header[1]];
+			        array2D_swap[x]              [y+int_header[1]]  =array2D[x+int_header[0]][y];
+			        array2D_swap[x+int_header[0]][y+int_header[1]]  =array2D[x]              [y];
+			    }
+			}
+			
+			//write swapped and cropped array    
+			int i = 0;
+			for (auto x = 0; x < int_header[0]; ++x){
+			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[0]/2];
+			}
+			f.write((char*)data_buffer,(this->size())/4*sizeof(float));
 			delete[] data_buffer;
 		}
 	}
@@ -475,15 +536,45 @@ namespace Prismatic {
 			char char_header[800];
 			std::memset((void *) char_header, 0, 800);
 			std::memset((void *) int_header, 0, 56 * sizeof(int));
-			int_header[0] = (int) dims[1]; //nx
-			int_header[1] = (int) dims[0]; //ny
+			int_header[0] = ((int) dims[1])/2; //nx cropped
+			int_header[1] = ((int) dims[0])/2; //ny cropped
 			int_header[2] = (int) 1; //nz
 			int_header[3] = 2; //mode, float
 			f.write((char*)int_header,56*4); //use 4 instead of sizeof(int) because architecture may change but file format won't
 			f.write(char_header,800);
-			float* data_buffer = new float[this->size()];
-			for (auto i = 0; i < this->size(); ++i)data_buffer[i] = (float)data[i];
-			f.write((char*)data_buffer,this->size()*sizeof(float));
+			float* data_buffer = new float[(this->size())/4];
+			
+			// create 2x 2D array
+			std::vector<std::vector<float>> array2D;
+			// Set up sizes. (HEIGHT x WIDTH)
+			array2D.resize(2*int_header[0]);
+			for (int i = 0; i < 2*int_header[0]; ++i)
+			    array2D[i].resize(2*int_header[1]);
+			
+			std::vector<std::vector<float>> array2D_swap;
+			// Set up sizes. (HEIGHT x WIDTH)
+			array2D_swap.resize(2*int_header[0]);
+			for (int i = 0; i < 2*int_header[0]; ++i)
+			    array2D_swap[i].resize(2*int_header[1]);
+			
+			//load array
+			for (auto i = 0; i < this->size(); ++i) array2D[i/(2*int_header[0])][i%(2*int_header[1])] = (float)data[i];
+			//swap quadrants
+			for (auto x = 0; x < int_header[0]; ++x){
+			    for (auto y = 0; y < int_header[1]; ++y){
+			        array2D_swap[x]              [y]                =array2D[x+int_header[0]][y+int_header[1]];
+			        array2D_swap[x+int_header[0]][y]                =array2D[x]              [y+int_header[1]];
+			        array2D_swap[x]              [y+int_header[1]]  =array2D[x+int_header[0]][y];
+			        array2D_swap[x+int_header[0]][y+int_header[1]]  =array2D[x]              [y];
+			    }
+			}
+			
+			//write swapped and cropped array    
+			int i = 0;
+			for (auto x = 0; x < int_header[0]; ++x){
+			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[0]/2];
+			}
+			f.write((char*)data_buffer,(this->size())/4*sizeof(float));
 			delete[] data_buffer;
 		}
 	}
