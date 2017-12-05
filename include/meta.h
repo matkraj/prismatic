@@ -75,6 +75,7 @@ namespace Prismatic{
 			save2DOutput          = false;
 			save3DOutput          = true;
 			save4DOutput          = false;
+            save4DComplexOutput   = false;
 			userSpecifiedCelldims = false;
 			integrationAngleMin   = 0;
 			integrationAngleMax   = detectorAngleStep;
@@ -124,6 +125,7 @@ namespace Prismatic{
 		T integrationAngleMax;
 		bool save3DOutput;
 		bool save4DOutput;
+		bool save4DComplexOutput;
 		bool userSpecifiedCelldims;
 		StreamingMode transferMode;
 
@@ -205,6 +207,11 @@ namespace Prismatic{
 			std::cout << "save4DOutput = true" << std::endl;
 		} else {
 			std::cout << "save4DOutput = false" << std::endl;
+		}		
+		if (save4DComplexOutput) {
+			std::cout << "save4DComplexOutput = true" << std::endl;
+		} else {
+			std::cout << "save4DComplexOutput = false" << std::endl;
 		}
 
 
@@ -262,6 +269,7 @@ namespace Prismatic{
 		if(save2DOutput != other.save2DOutput)return false;
 		if(save3DOutput != other.save3DOutput)return false;
 		if(save4DOutput != other.save4DOutput)return false;
+		if(save4DComplexOutput != other.save4DComplexOutput)return false;
 		if(userSpecifiedCelldims != other.userSpecifiedCelldims)return false;
 		return true;
 	}

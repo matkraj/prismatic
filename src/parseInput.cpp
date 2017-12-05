@@ -67,7 +67,8 @@ namespace Prismatic {
                 "* --occupancy (-oc) bool : whether or not to consider occupancy values for likelihood of atoms existing at each site (default: True)\n" <<
 		        "* --save-2D-output (-2D) ang_min ang_max : save the 2D STEM image integrated between ang_min and ang_max (in mrads) (default: Off)\n" <<
 	            "* --save-3D-output (-3D) bool=true : Also save the 3D output at the detector for each probe (3D output mode) (default: On)\n" <<
-                "* --save-4D-output (-4D) bool=false : Also save the 4D output at the detector for each probe (4D output mode) (default: Off)\n";
+                "* --save-4D-output (-4D) bool=false : Also save the 4D output at the detector for each probe (4D output mode) (default: Off)\n" <<
+                "* --save-4DComplex-output (-4DComplex) bool=false : Also save the 4D Complex wave output at the detector for each probe (4D output mode) (default: Off)\n";
     }
 
     bool parse_a(Metadata<PRISMATIC_FLOAT_PRECISION>& meta,
@@ -770,6 +771,18 @@ namespace Prismatic {
         argc-=2;
         argv[0]+=2;
         return true;
+    };    
+    
+    bool parse_4DComplex(Metadata<PRISMATIC_FLOAT_PRECISION>& meta,
+                 int& argc, const char*** argv){
+        if (argc < 2){
+            cout << "No value provided for -4DComplex (syntax is -4DComplex bool)\n";
+            return false;
+        }
+        meta.save4DComplexOutput = std::string((*argv)[1]) == "0" ? false : true;
+        argc-=2;
+        argv[0]+=2;
+        return true;
     };
 
     bool parseInputs(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
@@ -828,7 +841,8 @@ namespace Prismatic {
             {"--occupancy", parse_oc}, {"-oc", parse_oc},
             {"--save-2D-output", parse_2D}, {"-2D", parse_2D},
             {"--save-3D-output", parse_3D}, {"-3D", parse_3D},
-            {"--save-4D-output", parse_4D}, {"-4D", parse_4D}
+            {"--save-4D-output", parse_4D}, {"-4D", parse_4D},
+            {"--save-4DComplex-output", parse_4DComplex}, {"-4DComplex", parse_4DComplex}
     };
     bool parseInput(Metadata<PRISMATIC_FLOAT_PRECISION>& meta,
                            int& argc, const char*** argv){

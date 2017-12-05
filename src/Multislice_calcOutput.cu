@@ -644,6 +644,10 @@ namespace Prismatic{
 		}
 		abs_squared<<<(psi_size - 1) / BLOCK_SIZE1D + 1,BLOCK_SIZE1D, 0, stream>>>(psiIntensity_ds, psi_ds, psi_size);
 		formatOutput_GPU_integrate(pars, psiIntensity_ds, alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
+		real<<<(psi_size - 1) / BLOCK_SIZE1D + 1,BLOCK_SIZE1D, 0, stream>>>(psiIntensity_ds, psi_ds, psi_size);
+		formatOutput_GPU_real(pars, psiIntensity_ds, alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
+		imag<<<(psi_size - 1) / BLOCK_SIZE1D + 1,BLOCK_SIZE1D, 0, stream>>>(psiIntensity_ds, psi_ds, psi_size);
+		formatOutput_GPU_imag(pars, psiIntensity_ds, alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
 }
 
 	__host__ void getMultisliceProbe_GPU_singlexfer_batch(Parameters<PRISMATIC_FLOAT_PRECISION>& pars,
@@ -689,6 +693,7 @@ namespace Prismatic{
 						(psi_ds + (batch_idx * psi_size), PRISMATIC_MAKE_CU_COMPLEX(psi_size, 0), psi_size);
 			}
 		}
+		
 		abs_squared << < ( psi_size*(Nstop-Nstart) - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >> > (psiIntensity_ds, psi_ds, psi_size*(Nstop-Nstart));
 		for (auto batch_idx = 0; batch_idx < (Nstop-Nstart); ++batch_idx) {
 			const size_t ay = (Nstart + batch_idx) / pars.xp.size();
@@ -696,6 +701,23 @@ namespace Prismatic{
 			formatOutput_GPU_integrate(pars, psiIntensity_ds + (batch_idx * psi_size),
 			                           alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
 		}
+		if (pars.meta.save4DComplexOutput) {
+            real << < ( psi_size*(Nstop-Nstart) - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >> > (psiIntensity_ds, psi_ds, psi_size*(Nstop-Nstart));
+            for (auto batch_idx = 0; batch_idx < (Nstop-Nstart); ++batch_idx) {
+                const size_t ay = (Nstart + batch_idx) / pars.xp.size();
+                const size_t ax = (Nstart + batch_idx) % pars.xp.size();
+                formatOutput_GPU_real(pars, psiIntensity_ds + (batch_idx * psi_size),
+                                        alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
+            }
+            
+            imag << < ( psi_size*(Nstop-Nstart) - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >> > (psiIntensity_ds, psi_ds, psi_size*(Nstop-Nstart));
+            for (auto batch_idx = 0; batch_idx < (Nstop-Nstart); ++batch_idx) {
+                const size_t ay = (Nstart + batch_idx) / pars.xp.size();
+                const size_t ax = (Nstart + batch_idx) % pars.xp.size();
+                formatOutput_GPU_imag(pars, psiIntensity_ds + (batch_idx * psi_size),
+                                        alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
+            }
+        }
 	}
 
 	__host__ void getMultisliceProbe_GPU_streaming(Parameters<PRISMATIC_FLOAT_PRECISION>& pars,
@@ -733,6 +755,13 @@ namespace Prismatic{
 		}
 		abs_squared<<<(psi_size - 1) / BLOCK_SIZE1D + 1,BLOCK_SIZE1D, 0, stream>>>(psiIntensity_ds, psi_ds, psi_size);
 		formatOutput_GPU_integrate(pars, psiIntensity_ds, alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi,stream);
+        if (pars.meta.save4DComplexOutput) {
+            real<<<(psi_size - 1) / BLOCK_SIZE1D + 1,BLOCK_SIZE1D, 0, stream>>>(psiIntensity_ds, psi_ds, psi_size);
+            formatOutput_GPU_real(pars, psiIntensity_ds, alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi,stream);
+            imag<<<(psi_size - 1) / BLOCK_SIZE1D + 1,BLOCK_SIZE1D, 0, stream>>>(psiIntensity_ds, psi_ds, psi_size);
+            formatOutput_GPU_imag(pars, psiIntensity_ds, alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi,stream);
+        }
+
 	}
 
 
@@ -789,6 +818,22 @@ namespace Prismatic{
 			formatOutput_GPU_integrate(pars, psiIntensity_ds + (batch_idx * psi_size),
 			                           alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
 		}
+		if (pars.meta.save4DComplexOutput) {
+            real << < (psi_size*(Nstop-Nstart) - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >> > (psiIntensity_ds, psi_ds, psi_size*(Nstop-Nstart));
+            for (auto batch_idx = 0; batch_idx < (Nstop-Nstart); ++batch_idx) {
+                const size_t ay = (Nstart + batch_idx) / pars.xp.size();
+                const size_t ax = (Nstart + batch_idx) % pars.xp.size();
+                formatOutput_GPU_real(pars, psiIntensity_ds + (batch_idx * psi_size),
+                                        alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
+            }
+            imag << < (psi_size*(Nstop-Nstart) - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >> > (psiIntensity_ds, psi_ds, psi_size*(Nstop-Nstart));
+            for (auto batch_idx = 0; batch_idx < (Nstop-Nstart); ++batch_idx) {
+                const size_t ay = (Nstart + batch_idx) / pars.xp.size();
+                const size_t ax = (Nstart + batch_idx) % pars.xp.size();
+                formatOutput_GPU_imag(pars, psiIntensity_ds + (batch_idx * psi_size),
+                                        alphaInd_d, output_ph, integratedOutput_ds, ay, ax, dimj, dimi, stream);
+            }
+        }
 	}
     __host__ void buildMultisliceOutput_GPU_singlexfer(Parameters <PRISMATIC_FLOAT_PRECISION> &pars){
 		using namespace std;

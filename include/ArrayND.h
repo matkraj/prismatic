@@ -466,7 +466,7 @@ namespace Prismatic {
 			//write swapped and cropped array    
 			int i = 0;
 			for (auto x = 0; x < int_header[0]; ++x){
-			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[1]/2];
+			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[0]/2];
 			}
 			f.write((char*)data_buffer,(this->size())/4*sizeof(float));
 			delete[] data_buffer;
@@ -519,7 +519,7 @@ namespace Prismatic {
 			//write swapped and cropped array    
 			int i = 0;
 			for (auto x = 0; x < int_header[0]; ++x){
-			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[1]/2];
+			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[0]/2];
 			}
 			f.write((char*)data_buffer,(this->size())/4*sizeof(float));
 			delete[] data_buffer;
@@ -572,7 +572,7 @@ namespace Prismatic {
 			//write swapped and cropped array    
 			int i = 0;
 			for (auto x = 0; x < int_header[0]; ++x){
-			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[1]/2];
+			    for (auto y = 0; y < int_header[1]; ++y) data_buffer[i++]=array2D_swap[x+int_header[0]/2][y+int_header[0]/2];
 			}
 			f.write((char*)data_buffer,(this->size())/4*sizeof(float));
 			delete[] data_buffer;

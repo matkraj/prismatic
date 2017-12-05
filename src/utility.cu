@@ -268,6 +268,54 @@ __global__ void abs_squared(float* arr,
 	}
 }
 
+// compute modulus squared of other and store in arr
+__global__ void real(double* arr,
+                            const cuDoubleComplex* other,
+                            const size_t N){
+	int idx = threadIdx.x + blockDim.x*blockIdx.x;
+	if (idx < N) {
+		double re = other[idx].x;
+		double im = other[idx].y;
+		arr[idx] = re + 0.0*im;
+	}
+}
+
+// compute modulus squared of other and store in arr
+__global__ void real(float* arr,
+                            const cuFloatComplex* other,
+                            const size_t N){
+	int idx = threadIdx.x + blockDim.x*blockIdx.x;
+	if (idx < N) {
+		float re = other[idx].x;
+		float im = other[idx].y;
+		arr[idx] = re + 0.0*im;
+	}
+}
+
+// compute modulus squared of other and store in arr
+__global__ void imag(double* arr,
+                            const cuDoubleComplex* other,
+                            const size_t N){
+	int idx = threadIdx.x + blockDim.x*blockIdx.x;
+	if (idx < N) {
+		double re = other[idx].x;
+		double im = other[idx].y;
+		arr[idx] = 0.0*re + im;
+	}
+}
+
+// compute modulus squared of other and store in arr
+__global__ void imag(float* arr,
+                            const cuFloatComplex* other,
+                            const size_t N){
+	int idx = threadIdx.x + blockDim.x*blockIdx.x;
+	if (idx < N) {
+		float re = other[idx].x;
+		float im = other[idx].y;
+		arr[idx] = 0.0*re + im;
+	}
+}
+
 __global__ void array_subset(const cuDoubleComplex* psi_d,
                              cuDoubleComplex* psi_small_d,
                              const size_t* qyInd_d,
@@ -453,6 +501,8 @@ void formatOutput_GPU_integrate(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION>
 		                           stream));
 		currentImage.toMRC_f(section4DFilename.c_str());
 	}
+	
+	
 //		cudaSetDeviceFlags(cudaDeviceBlockingSync);
 
 
@@ -516,6 +566,75 @@ void formatOutput_GPU_integrate(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION>
 			ay * pars.output.get_dimj() * pars.output.get_dimi() + ax * pars.output.get_dimi();
 	memcpy(&pars.output[stack_start_offset], output_ph, num_integration_bins * sizeof(PRISMATIC_FLOAT_PRECISION));
 }
+
+void formatOutput_GPU_real(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> &pars,
+                                PRISMATIC_FLOAT_PRECISION *psiIntensity_ds,
+                                const PRISMATIC_FLOAT_PRECISION *alphaInd_d,
+                                PRISMATIC_FLOAT_PRECISION *output_ph,
+                                PRISMATIC_FLOAT_PRECISION *integratedOutput_ds,
+                                const size_t ay,
+                                const size_t ax,
+                                const size_t& dimj,
+                                const size_t& dimi,
+                                const cudaStream_t& stream,
+                                const long& scale) {
+
+		// This section could be improved. It currently makes a new 2D array, copies to it, and
+		// then saves the image. This allocates arrays multiple times unneccessarily, and the allocated
+		// memory isn't pinned, so the memcpy is not asynchronous.
+		std::string section4DFilename = "Complex_real_";
+        section4DFilename += generateFilename(pars, ay, ax);
+		Prismatic::Array2D<PRISMATIC_FLOAT_PRECISION> currentImage = Prismatic::zeros_ND<2, PRISMATIC_FLOAT_PRECISION>(
+				{{pars.psiProbeInit.get_dimj(), pars.psiProbeInit.get_dimi()}});
+		cudaErrchk(cudaMemcpyAsync(&currentImage[0],
+		                           psiIntensity_ds,
+		                           pars.psiProbeInit.size() * sizeof(PRISMATIC_FLOAT_PRECISION),
+		                           cudaMemcpyDeviceToHost,
+		                           stream));
+		currentImage.toMRC_f(section4DFilename.c_str());
+}
+
+void formatOutput_GPU_imag(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> &pars,
+                                PRISMATIC_FLOAT_PRECISION *psiIntensity_ds,
+                                const PRISMATIC_FLOAT_PRECISION *alphaInd_d,
+                                PRISMATIC_FLOAT_PRECISION *output_ph,
+                                PRISMATIC_FLOAT_PRECISION *integratedOutput_ds,
+                                const size_t ay,
+                                const size_t ax,
+                                const size_t& dimj,
+                                const size_t& dimi,
+                                const cudaStream_t& stream,
+                                const long& scale) {
+
+		// This section could be improved. It currently makes a new 2D array, copies to it, and
+		// then saves the image. This allocates arrays multiple times unneccessarily, and the allocated
+		// memory isn't pinned, so the memcpy is not asynchronous.
+		std::string section4DFilename = "Complex_imag_";
+        section4DFilename += generateFilename(pars, ay, ax);
+		Prismatic::Array2D<PRISMATIC_FLOAT_PRECISION> currentImage = Prismatic::zeros_ND<2, PRISMATIC_FLOAT_PRECISION>(
+				{{pars.psiProbeInit.get_dimj(), pars.psiProbeInit.get_dimi()}});
+		cudaErrchk(cudaMemcpyAsync(&currentImage[0],
+		                           psiIntensity_ds,
+		                           pars.psiProbeInit.size() * sizeof(PRISMATIC_FLOAT_PRECISION),
+		                           cudaMemcpyDeviceToHost,
+		                           stream));
+		currentImage.toMRC_f(section4DFilename.c_str());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 size_t getNextPower2(const size_t& val){
 	size_t p = 0;

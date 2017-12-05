@@ -112,6 +112,28 @@ __global__ void abs_squared(float* arr,
                             const cuFloatComplex* other,
                             const size_t N);
 
+// compute modulus squared of other and store in arr
+__global__ void real(double* arr,
+                            const cuDoubleComplex* other,
+                            const size_t N);
+
+
+// compute modulus squared of other and store in arr
+__global__ void real(float* arr,
+                            const cuFloatComplex* other,
+                            const size_t N);
+
+// compute modulus squared of other and store in arr
+__global__ void imag(double* arr,
+                            const cuDoubleComplex* other,
+                            const size_t N);
+
+
+// compute modulus squared of other and store in arr
+__global__ void imag(float* arr,
+                            const cuFloatComplex* other,
+                            const size_t N);
+
 
 __global__ void array_subset(const cuDoubleComplex* psi_d,
                              cuDoubleComplex* psi_small_d,
@@ -164,6 +186,30 @@ __global__ void integrateDetector(const float* psiIntensity_ds,
                        const size_t num_integration_bins);
 
 void formatOutput_GPU_integrate(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> &pars,
+                                PRISMATIC_FLOAT_PRECISION *psiIntensity_ds,
+                                const PRISMATIC_FLOAT_PRECISION *alphaInd_d,
+                                PRISMATIC_FLOAT_PRECISION *stack_ph,
+                                PRISMATIC_FLOAT_PRECISION *integratedOutput_ds,
+                                const size_t ay,
+                                const size_t ax,
+                                const size_t& dimj,
+                                const size_t& dimi,
+                                const cudaStream_t& stream,
+                                const long& scale = 1);
+
+void formatOutput_GPU_real(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> &pars,
+                                PRISMATIC_FLOAT_PRECISION *psiIntensity_ds,
+                                const PRISMATIC_FLOAT_PRECISION *alphaInd_d,
+                                PRISMATIC_FLOAT_PRECISION *stack_ph,
+                                PRISMATIC_FLOAT_PRECISION *integratedOutput_ds,
+                                const size_t ay,
+                                const size_t ax,
+                                const size_t& dimj,
+                                const size_t& dimi,
+                                const cudaStream_t& stream,
+                                const long& scale = 1);
+
+void formatOutput_GPU_imag(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> &pars,
                                 PRISMATIC_FLOAT_PRECISION *psiIntensity_ds,
                                 const PRISMATIC_FLOAT_PRECISION *alphaInd_d,
                                 PRISMATIC_FLOAT_PRECISION *stack_ph,

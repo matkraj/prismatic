@@ -1681,6 +1681,10 @@ __global__ void scaleReduceS(const cuFloatComplex *permutedScompact_d,
 		formatOutput_GPU_integrate(pars, psiIntensity_ds, alphaInd_d, output_ph,
 		                           integratedOutput_ds, ay, ax, pars.imageSizeReduce[0],
 		                           pars.imageSizeReduce[1], stream, pars.scale);
+        real <<< (psi_size - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >>> (psiIntensity_ds, psi_ds, psi_size);
+        formatOutput_GPU_real(pars, psiIntensity_ds, alphaInd_d, output_ph,
+		                           integratedOutput_ds, ay, ax, pars.imageSizeReduce[0],
+		                           pars.imageSizeReduce[1], stream, pars.scale);
 	}
 
 	void buildSignal_GPU_streaming(Parameters<PRISMATIC_FLOAT_PRECISION>&  pars,
@@ -1933,6 +1937,15 @@ __global__ void scaleReduceS(const cuFloatComplex *permutedScompact_d,
 
 		// output calculation result
 		formatOutput_GPU_integrate(pars, psiIntensity_ds, alphaInd_d, output_ph,
+		                           integratedOutput_ds, ay, ax, pars.imageSizeReduce[0],
+		                           pars.imageSizeReduce[1], stream, pars.scale);
+        
+		real <<< (psi_size - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >>> (psiIntensity_ds, psi_ds, psi_size);
+        formatOutput_GPU_real(pars, psiIntensity_ds, alphaInd_d, output_ph,
+		                           integratedOutput_ds, ay, ax, pars.imageSizeReduce[0],
+		                           pars.imageSizeReduce[1], stream, pars.scale);
+		imag <<< (psi_size - 1) / BLOCK_SIZE1D + 1, BLOCK_SIZE1D, 0, stream >>> (psiIntensity_ds, psi_ds, psi_size);
+        formatOutput_GPU_imag(pars, psiIntensity_ds, alphaInd_d, output_ph,
 		                           integratedOutput_ds, ay, ax, pars.imageSizeReduce[0],
 		                           pars.imageSizeReduce[1], stream, pars.scale);
 	}
